@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Appointment Status</title>
+
+<style>
+body{
+    font-family: Segoe UI;
+    background:#f4f8fb;
+    margin:0;
+}
+
+/* TOP BAR */
+.topbar{
+    background:#1e3c72;
+    padding:12px 20px;
+}
+
+.home-link{
+    color:white;
+    text-decoration:none;
+    font-size:18px;
+    font-weight:600;
+}
+
+/* CONTENT */
+.container{
+    max-width:800px;
+    margin:40px auto;
+}
+
+.card{
+    background:white;
+    padding:18px;
+    border-radius:12px;
+    margin-bottom:15px;
+    box-shadow:0 6px 15px rgba(0,0,0,.1);
+}
+
+/* STATUS COLORS */
+.status-accepted{
+    color: green;
+    font-weight: bold;
+}
+.status-rejected{
+    color: #c0392b;
+    font-weight: bold;
+}
+.status-pending{
+    color: orange;
+    font-weight: bold;
+}
+
+/* SUPPORT BUTTON */
+.support-btn{
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    background:#1e3c72;
+    color:white;
+    font-size:28px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(0,0,0,.3);
+    z-index:1000;
+}
+
+/* CHAT BOX */
+.chat-box{
+    position: fixed;
+    bottom: 95px;
+    right: 25px;
+    width: 330px;
+    height: 430px;
+    background:#fff;
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+    display:none;
+    flex-direction:column;
+    z-index:1000;
+}
+
+.chat-header{
+    background:#1e3c72;
+    color:#fff;
+    padding:12px;
+    border-radius:15px 15px 0 0;
+    font-weight:600;
+}
+
+.chat-body{
+    flex:1;
+    padding:10px;
+    overflow-y:auto;
+    background:#f4f8fb;
+}
+
+.chat-msg{
+    margin:8px 0;
+    padding:8px 12px;
+    border-radius:10px;
+    max-width:80%;
+    font-size:14px;
+}
+
+.user{
+    background:#1e3c72;
+    color:white;
+    margin-left:auto;
+}
+
+.bot{
+    background:#e0e0e0;
+}
+
+.chat-input{
+    display:flex;
+    border-top:1px solid #ddd;
+}
+
+.chat-input input{
+    flex:1;
+    padding:10px;
+    border:none;
+    outline:none;
+}
+
+.chat-input button{
+    background:#1e3c72;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SUPPORT CHAT -->
+<div class="support-btn" onclick="toggleChat()">💬</div>
+
+<div class="chat-box" id="chatBox">
+    <div class="chat-header">Medical Home Care Support</div>
+    <div class="chat-body" id="chatBody">
+        <div class="chat-msg bot">
+            Hello 👋 How can I assist you today?
+        </div>
+    </div>
+    <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <a class="home-link" href="{{ url_for('home') }}">🏠 Home</a>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+    <h2>Welcome, {{ username }}</h2>
+    <h3>Your Appointment Status</h3>
+
+    {% for b in bookings %}
+    <div class="card">
+        <p><strong>Service:</strong> {{ b.service }}</p>
+        <p><strong>Date:</strong> {{ b.date }}</p>
+        <p>
+            <strong>Status:</strong>
+            <span class="
+                {% if b.status == 'Accepted' %}
+                    status-accepted
+                {% elif b.status == 'Pending' %}
+                    status-pending
+                {% else %}
+                    status-rejected
+                {% endif %}
+            ">
+                {{ b.status }}
+            </span>
+        </p>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function toggleChat(){
+    const box = document.getElementById("chatBox");
+    box.style.display = box.style.display === "flex" ? "none" : "flex";
+}
+
+function sendMessage(){
+    const input = document.getElementById("chatInput");
+    const text = input.value.trim();
+    if(!text) return;
+
+    const msg = text.toLowerCase();
+    const body = document.getElementById("chatBody");
+
+    body.innerHTML += `<div class="chat-msg user">${text}</div>`;
+    input.value = "";
+
+    let reply = "Please contact our medical support team for further assistance ☎";
+
+    if(msg.includes("service")) reply = "We provide nursing, doctor visits, elderly care, physiotherapy, and lab services.";
+    else if(msg.includes("nurse")) reply = "Certified nurses are available for injections, wound care, and daily assistance.";
+    else if(msg.includes("doctor")) reply = "Doctors can visit your home for consultation and follow-ups.";
+    else if(msg.includes("elderly")) reply = "We provide complete elderly home care services.";
+    else if(msg.includes("physio")) reply = "Home physiotherapy is available for pain relief and recovery.";
+    else if(msg.includes("lab")) reply = "Lab sample collection is available at home.";
+    else if(msg.includes("emergency")) reply = "For emergencies, contact local emergency services immediately 🚑";
+
+    setTimeout(() => {
+        body.innerHTML += `<div class="chat-msg bot">${reply}</div>`;
+        body.scrollTop = body.scrollHeight;
+    }, 400);
+
+    body.scrollTop = body.scrollHeight;
+}
+</script>
+
+</body>
+</html>
